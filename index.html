@@ -240,7 +240,7 @@
                 <div>
                     <div class="text-[13px] text-gray-400 font-medium">導覽路線模式</div>
                     <select id="tour-mode" onchange="changeTourMode(this.value)" class="bg-black/60 text-[15px] font-bold text-white focus:outline-none cursor-pointer rounded px-1 py-0.5 border border-white/10">
-                        <option value="classic" class="bg-[#161619] text-white">🏆 典藏經典 (2.5 hr)</option>
+                        <option value="" class="bg-[#161619] text-white">🏆 典藏經典 (2.5 hr)</option>
                         <option value="fast" class="bg-[#161619] text-white">⚡ 精華速覽 (1.5 hr)</option>
                         <option value="complete" class="bg-[#161619] text-white">💎 深度巡禮 (3.5 hr)</option>
                     </select>
@@ -958,7 +958,7 @@
         /* APPLICATION STATE */
         let currentTab = 'artworks';
         let currentArtwork = artworksData.find(a => a.id === 'botticelli-venus');
-        let currentMode = 'classic';
+        let currentMode = 'complete';
         let activeFloorFilter = 'all';
         let favorites = new Set(JSON.parse(localStorage.getItem('uffizi_favs') || '[]'));
         let visited = new Set(JSON.parse(localStorage.getItem('uffizi_visited') || '[]'));
