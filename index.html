@@ -625,7 +625,7 @@
                     alt="Current Artwork" class="w-9 h-9 rounded-lg object-cover border border-ferrari-red">
                 <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-1.5">
-                        <span id="player-room" class="text-[14px] font-tech bg-ferrari-carbon border border-ferrari-red  text-white px-1 rounded font-bold">A9展廳</span>
+                        <span id="player-room" class="text-[14px] font-tech bg-ferrari-carbon border border-ferrari-red  text-white px-1 rounded font-bold">A9 展廳</span>
                         <h4 id="player-title" class="text-[15px] font-bold text-white truncate">維納斯的誕生</h4>
                     </div>
                     <p id="player-artist" class="text-[14px] text-gray-400 truncate">桑德羅·波提切利</p>
@@ -636,7 +636,7 @@
             </div>
 
             <!-- Play & Pause Control -->
-            <button onclick="toggleAudioSpeech()" id="player-play-btn" class="w-9 h-9 rounded-full bg-ferrari-red text-white flex items-center justify-center led-red hover:scale-105 active:scale-95 transition ml-2">
+            <button onclick="toggleAudioSpeech()" id="player-play-btn" class="w-9 h-9 rounded-full bg-ferrari-carbon border border-ferrari-red text-ferrari-yellow flex items-center justify-center led-red hover:scale-105 active:scale-95 transition ml-2">
                 <i id="play-icon" data-lucide="play" class="w-4 h-4 ml-0.5"></i>
             </button>
 
@@ -698,7 +698,7 @@
                             1.0x 語速
                         </button>
 
-                        <button onclick="toggleAudioSpeech()" id="modal-play-btn" class="w-12 h-12 rounded-full bg-ferrari-red text-white flex items-center justify-center led-red hover:scale-105 active:scale-95 transition">
+                        <button onclick="toggleAudioSpeech()" id="modal-play-btn" class="w-12 h-12 rounded-full bg-ferrari-carbon border border-ferrari-red text-ferrari-yellow flex items-center justify-center led-red hover:scale-105 active:scale-95 transition">
                             <i id="modal-play-icon" data-lucide="play" class="w-6 h-6 ml-0.5"></i>
                         </button>
 
@@ -995,10 +995,10 @@
         function filterByFloor(floor) {
             activeFloorFilter = floor;
             document.querySelectorAll('.floor-tab-btn').forEach(btn => {
-                btn.classList.remove('bg-ferrari-red', 'text-white', 'border-ferrari-red', 'active');
+                btn.classList.remove('bg-ferrari-carbon', 'text-ferrari-yellow', 'bg-ferrari-carbon', 'active');
                 btn.classList.add('bg-carbon-pattern', 'text-gray-300', 'border-gray-700');
             });
-            event.currentTarget.classList.add('bg-ferrari-red', 'text-white', 'border-ferrari-red', 'active');
+            event.currentTarget.classList.add('bg-ferrari-carbon', 'text-ferrari-yellow', 'bg-ferrari-carbon', 'active');
             event.currentTarget.classList.remove('bg-carbon-pattern', 'text-gray-300', 'border-gray-700');
             renderArtworkList();
         }
@@ -1288,7 +1288,7 @@
             document.getElementById('player-thumb').src = currentArtwork.img;
             document.getElementById('player-title').innerText = currentArtwork.title;
             document.getElementById('player-artist').innerText = currentArtwork.artist;
-            document.getElementById('player-room').innerText = `${currentArtwork.roomCode}展廳`;
+            document.getElementById('player-room').innerText = `${currentArtwork.roomCode}`展廳;
             
             // 每次更新播放卡片時，同步地圖閃爍展廳
             highlightRoomOnMap(currentArtwork.roomCode);
