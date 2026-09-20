@@ -1288,7 +1288,7 @@
             document.getElementById('player-thumb').src = currentArtwork.img;
             document.getElementById('player-title').innerText = currentArtwork.title;
             document.getElementById('player-artist').innerText = currentArtwork.artist;
-            document.getElementById('player-room').innerText = `${currentArtwork.roomCode}`展廳;
+            document.getElementById('player-room').innerText = currentArtwork.roomCode;
             
             // 每次更新播放卡片時，同步地圖閃爍展廳
             highlightRoomOnMap(currentArtwork.roomCode);
