@@ -2,7 +2,7 @@
 <html lang="zh-TW" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
     <!-- 100% 消除 iOS Safari 頂部系統狀態欄留白：融合法拉利深黑碳纖維底色 -->
     <meta name="theme-color" content="#0B0B0C" media="(prefers-color-scheme: dark)">
@@ -214,8 +214,8 @@
 <body class="bg-white min-h-screen flex items-center justify-center p-0 sm:p-4">
 
     <!-- Single Phone Frame Outer Container -->
-    <div id="app" class="w-full max-w-[430px] h-[100vh] sm:h-[880px] bg-white sm:rounded-[42px] shadow-2xl sm:border-[6px] border-gray-200 flex flex-col overflow-hidden relative">
-        
+    <div id="app" class="w-full max-w-[430px] h-dvh sm:h-[880px] bg-white sm:rounded-[42px] shadow-2xl sm:border-[6px] border-gray-200 flex flex-col overflow-hidden relative pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+
         <!-- Top Sticky Header -->
         <header class="sticky top-0 z-50 flex flex-col px-4 pt-2 pb-3 header-safe-area text-white transition-colors bg-[#0B0B0D]/95 backdrop-blur-xl border-b border-red-900/40 shadow-md">
             <div class="h-1 w-full ferrari-stripe rounded-full mb-2"></div>
