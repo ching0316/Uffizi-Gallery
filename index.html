@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>烏菲茲美術館互動導覽 | Uffizi Gallery Audio Guide</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        ferrari: {
+                            red: '#EF0000',       /* Rosso Corsa */
+                            darkred: '#990000',   /* Deep Racing Red */
+                            yellow: '#FFD700',    /* Giallo Modena */
+                            gold: '#F59E0B',      /* Racing Gold */
+                            carbon: '#09090A',    /* Carbon Fiber Base */
+                            card: '#161619',      /* Cockpit Panel Dark */
+                            border: '#2A2A30'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
+                        tech: ['Chakra Petch', 'Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style> 
+        html { 
+            scroll-behavior: smooth; 
+            -webkit-tap-highlight-color: transparent; 
+            background-color: #ffffff; 
+        } 
+        body { 
+            font-family: 'Inter', 'Noto Sans TC', -apple-system, sans-serif; 
+            background-color: #ffffff; 
+            color: #111827; 
+            overflow-x: hidden; 
+        } 
+        
+        /* 碳纖維底紋網格 */ 
+        .bg-carbon-pattern { 
+            background-color: #0d0d10; 
+            background-image:  
+                radial-gradient(rgba(239, 0, 0, 0.12) 1px, transparent 0), 
+                linear-gradient(45deg, #16161a 25%, transparent 25%, transparent 75%, #16161a 75%, #16161a), 
+                linear-gradient(45deg, #16161a 25%, transparent 25%, transparent 75%, #16161a 75%, #16161a); 
+            background-size: 24px 24px, 8px 8px, 8px 8px; 
+            background-position: 0 0, 0 0, 4px 4px; 
+        } 
+    
+        .no-scrollbar::-webkit-scrollbar { 
+            display: none; 
+        } 
+        .no-scrollbar { 
+            -ms-overflow-style: none; 
+            scrollbar-width: none; 
+        } 
+        
+        /* iPhone 頂部避讓 */ 
+        .header-safe-area { 
+            padding-top: max(0.75rem, calc(env(safe-area-inset-top, 20px) + 0.25rem)); 
+        } 
+    
+        /* 控制台底座懸浮導覽列 */ 
+        .dock-safe-area { 
+            position: fixed; 
+            left: 1rem; 
+            right: 1rem; 
+            bottom: max(0.75rem, calc(env(safe-area-inset-bottom, 0px) + 0.5rem)); 
+            background: rgba(13, 13, 16, 0.94); 
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px); 
+            border: 1px solid rgba(239, 0, 0, 0.45); 
+            box-shadow:  
+                inset 0 1px 1px rgba(255, 255, 255, 0.15), 
+                0 0 20px rgba(239, 0, 0, 0.25), 
+                0 15px 30px -10px rgba(0, 0, 0, 0.6); 
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
+            z-index: 50; 
+        } 
+    
+        /* 競速光條 */ 
+        .ferrari-stripe { 
+            background: linear-gradient(90deg, #EF0000 0%, #FFD700 50%, #EF0000 100%); 
+        } 
+    
+        /* 碳纖維背景卡片 */
+        .carbon-card, .carbon-card-active { 
+            background-color: #0d0d10; 
+            background-image:  
+                radial-gradient(rgba(239, 0, 0, 0.1) 1px, transparent 0), 
+                linear-gradient(45deg, #16161a 25%, transparent 25%, transparent 75%, #16161a 75%, #16161a), 
+                linear-gradient(45deg, #16161a 25%, transparent 25%, transparent 75%, #16161a 75%, #16161a); 
+            background-size: 24px 24px, 8px 8px, 8px 8px; 
+            background-position: 0 0, 0 0, 4px 4px; 
+            border: 1px solid rgba(255, 255, 255, 0.12); 
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18); 
+            position: relative; 
+            overflow: hidden; 
+            color: #E5E7EB;
+        } 
+
+        .carbon-card::before, .carbon-card-active::before { 
+            content: ''; 
+            position: absolute; 
+            top: 0; left: 0; right: 0; 
+            height: 2px; 
+            background: linear-gradient(90deg, #EF0000, #FFD700, #EF0000); 
+            transition: opacity 0.4s ease; 
+        } 
+
+        .carbon-card::before { 
+            opacity: 0.25; 
+        } 
+        
+        .carbon-card:hover::before, .carbon-card-active::before { 
+            opacity: 1; 
+            background: linear-gradient(90deg, #EF0000, #FFD700, #EF0000); 
+        } 
+
+        .carbon-card-active {
+            border-color: rgba(239, 0, 0, 0.7);
+            box-shadow: 0 0 18px rgba(239, 0, 0, 0.25);
+        }
+    
+        /* 地圖展廳動態亮燈與閃爍效果 */
+        .room-box {
+            transition: fill 0.2s ease, stroke 0.2s ease;
+            cursor: pointer;
+            fill: #273043;
+            stroke: #4b5563;
+            stroke-width: 1;
+        }
+
+        .room-box:hover {
+            fill: #990000;
+            stroke: #FFD700;
+            stroke-width: 1.5;
+        }
+
+        /* 點選或聆聽時的強力閃爍效果 */
+        .room-box.active-room {
+            fill: #EF0000 !important;
+            stroke: #FFD700 !important;
+            stroke-width: 3px;
+            animation: roomPulse 0.8s infinite alternate ease-in-out;
+            filter: drop-shadow(0 0 12px #EF0000);
+        }
+
+        /* 展廳顏色分區標示 */
+        .room-blue { fill: #2e4374; stroke: #415a96; }
+        .room-green { fill: #2d6a4f; stroke: #40916c; }
+        .room-cyan { fill: #0081a7; stroke: #00afb9; }
+        .room-purple { fill: #6b2d5c; stroke: #8f3980; }
+        .room-teal { fill: #2a9d8f; stroke: #3a86c8; }
+
+        .room-label {
+            font-size: 8px;
+            font-weight: bold;
+            fill: #ffffff;
+            pointer-events: none;
+            text-anchor: middle;
+            dominant-baseline: central;
+            font-family: 'Chakra Petch', sans-serif;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+        }
+
+        .room-box.active-room + .room-label,
+        .room-box.active-room ~ .room-label {
+            fill: #ffffff;
+            font-weight: 900;
+        }
+
+        @keyframes roomPulse {
+            0% {
+                fill: #EF0000;
+                stroke: #FFD700;
+                filter: drop-shadow(0 0 4px #EF0000);
+                opacity: 0.6;
+            }
+            100% {
+                fill: #FFD700;
+                stroke: #EF0000;
+                filter: drop-shadow(0 0 16px #FFD700);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body class="bg-white min-h-screen flex items-center justify-center p-0 sm:p-4">
+
+    <!-- Single Phone Frame Outer Container -->
+    <div id="app" class="w-full max-w-[430px] h-[100vh] sm:h-[880px] bg-white sm:rounded-[42px] shadow-2xl sm:border-[6px] border-gray-200 flex flex-col overflow-hidden relative">
+        
+        <!-- Top Sticky Header -->
+        <header class="sticky top-0 z-50 flex flex-col px-4 pt-2 pb-3 header-safe-area text-white transition-colors bg-[#0B0B0D]/95 backdrop-blur-xl border-b border-red-900/40 shadow-md">
+            <div class="h-1 w-full ferrari-stripe rounded-full mb-2"></div>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-400 to-yellow-600 p-0.5 shadow-lg shadow-yellow-500/20 flex items-center justify-center shrink-0">
+                        <div class="w-full h-full bg-black rounded-[7px] flex items-center justify-center p-1">
+                            <img 
+                              src="https://ching0316.github.io/ITALIA-LUXURY-TRAVEL/apple-touch-icon.png" 
+                              alt="Ferrari Shield Logo" 
+                              class="w-full h-full object-contain"
+                              onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';"
+                            />
+                            <i data-lucide="shield" class="w-5 h-5 text-ferrari-yellow hidden"></i>
+                        </div>
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <p class="font-tech text-[14px] font-bold uppercase tracking-widest text-amber-300 leading-none">Uffizi Gallery</p>
+                        <h1 class="text-[18px] font-black text-white font-sans tracking-tight leading-tight mt-0.5">烏菲茲美術館互動導覽</h1>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sub Header: Tour Mode Selector -->
+        <div class="bg-carbon-pattern px-4 py-2.5 z-30 border-b border-gray-800 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-ferrari-red/20 border border-ferrari-red/50 flex items-center justify-center text-ferrari-red">
+                    <i data-lucide="compass" class="w-4 h-4"></i>
+                </div>
+                <div>
+                    <div class="text-[13px] text-gray-400 font-medium">導覽路線模式</div>
+                    <select id="tour-mode" onchange="changeTourMode(this.value)" class="bg-black/60 text-[15px] font-bold text-white focus:outline-none cursor-pointer rounded px-1 py-0.5 border border-white/10">
+                        <option value="" class="bg-[#161619] text-white">🏆 典藏經典 (2.5 hr)</option>
+                        <option value="fast" class="bg-[#161619] text-white">⚡ 精華速覽 (1.5 hr)</option>
+                        <option value="complete" class="bg-[#161619] text-white">💎 深度巡禮 (3.5 hr)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN SCROLLABLE CONTENT AREA -->
+        <div id="main-content" class="flex-1 overflow-y-auto no-scrollbar pb-32 bg-white">
+            
+            <!-- Tab 1: Artworks List -->
+            <div id="tab-artworks" class="p-4 space-y-4">
+                
+                <!-- Hero Header Card -->
+                <div class="carbon-card rounded-2xl p-4 border border-white/10">
+                    <div class="flex items-start justify-between relative z-10">
+                        <div>
+                            <span class="inline-block px-2 py-0.5 rounded bg-ferrari-red text-white text-[13px] font-extrabold uppercase tracking-widest mb-1 shadow-sm">
+                                UFFIZI MASTERPIECES
+                            </span>
+                            <h1 class="text-[22px] font-black text-metal tracking-tight">烏菲茲大師傑作特輯</h1>
+                            <p class="text-[15px] text-gray-400 mt-1">佛羅倫斯文藝復興巔峰，12大必看名畫與殿堂雕塑</p>
+                        </div>
+                        <div class="text-center bg-black/50 p-2 rounded-xl border border-white/10">
+                            <i data-lucide="map-pin" class="w-5 h-5 text-ferrari-red mx-auto"></i>
+                            <span id="floor-badge" class="text-[13px] font-bold text-gray-300 block mt-0.5">2F + 1F</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Search & Filter -->
+                    <div class="mt-4 flex items-center gap-2">
+                        <div class="relative flex-1">
+                            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-gray-400"></i>
+                            <input type="text" id="search-input" oninput="filterArtworks()" placeholder="搜尋畫家、作品或展廳 (如: 達文西, A16)" 
+                                class="w-full bg-black/60 border border-white/15 rounded-xl pl-9 pr-3 py-1.5 text-[15px] text-white placeholder-gray-500 focus:outline-none focus:border-ferrari-red transition-all">
+                        </div>
+                        <button onclick="toggleFavoriteFilter()" id="fav-filter-btn" class="p-2 bg-black/60 border border-white/15 rounded-xl text-gray-400 hover:text-ferrari-yellow transition">
+                            <i data-lucide="bookmark" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Floor Category Filter Buttons -->
+                <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+                    <button onclick="filterByFloor('all')" class="floor-tab-btn active text-[15px] font-bold px-3 py-1.5 rounded-xl border border-ferrari-red bg-ferrari-red text-white whitespace-nowrap shadow-sm">
+                        全部展品
+                    </button>
+                    <button onclick="filterByFloor('2F')" class="floor-tab-btn text-[15px] font-bold px-3 py-1.5 rounded-xl border border-gray-700 bg-carbon-pattern text-gray-300 hover:text-white whitespace-nowrap">
+                        2F 展廳 (早期/盛期文藝復興)
+                    </button>
+                    <button onclick="filterByFloor('1F')" class="floor-tab-btn text-[15px] font-bold px-3 py-1.5 rounded-xl border border-gray-700 bg-carbon-pattern text-gray-300 hover:text-white whitespace-nowrap">
+                        1F 展廳 (巴洛克與風格主義)
+                    </button>
+                </div>
+
+                <!-- Dynamic Artworks Container -->
+                <div id="artwork-list" class="space-y-3">
+                    <!-- Populated dynamically via JS -->
+                </div>
+
+            </div>
+
+            <!-- Tab 2: Map Tab -->
+            <div id="tab-map" class="p-4 hidden space-y-4">
+                <div class="carbon-card p-4 rounded-2xl border border-white/10">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h2 class="text-[19px] font-bold text-metal flex items-center gap-2">
+                                <i data-lucide="map" class="w-4 h-4 text-ferrari-red"></i> 烏菲茲展廳實境地圖
+                            </h2>
+                            <p class="text-[14px] text-gray-400">點擊展廳區塊；預設頂端/左側對齊，支援滑動與縮放</p>
+                        </div>
+                        <div class="flex gap-1 bg-black/40 p-1 rounded-xl border border-white/10">
+                            <button onclick="switchMapFloor('2F')" id="btn-map-2f" class="text-[14px] px-2.5 py-1 rounded-lg font-bold bg-ferrari-red text-white">2F</button>
+                            <button onclick="switchMapFloor('1F')" id="btn-map-1f" class="text-[14px] px-2.5 py-1 rounded-lg font-bold text-gray-400 hover:text-white">1F</button>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Map Container -->
+                    <div id="map-container" class="relative bg-[#09090c] rounded-xl overflow-hidden border border-white/10 p-2 min-h-[380px] flex flex-col justify-between select-none">
+                        
+                        <div class="flex justify-between items-center z-10 mb-1">
+                            <span id="map-floor-title" class="text-[13px] font-tech font-bold text-ferrari-gold bg-black/80 px-2 py-0.5 rounded border border-white/10">
+                                SECOND FLOOR (2F Galleria 二樓主展廳)
+                            </span>
+                            
+                            <!-- Zoom & Pan Quick Controls -->
+                            <div class="flex items-center gap-1 bg-black/80 px-1.5 py-0.5 rounded border border-white/10">
+                                <button onclick="zoomMap(0.3)" title="放大" class="p-1 text-gray-300 hover:text-ferrari-yellow active:scale-95 transition">
+                                    <i data-lucide="zoom-in" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="zoomMap(-0.3)" title="縮小" class="p-1 text-gray-300 hover:text-ferrari-yellow active:scale-95 transition">
+                                    <i data-lucide="zoom-out" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="resetMapZoom()" title="重設置頂置左" class="p-1 text-gray-300 hover:text-ferrari-yellow active:scale-95 transition">
+                                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 2F Map Graphic SVG Canvas (Top-Left Aligned Viewport) -->
+                        <div id="map-graphic-2f" class="my-1 relative w-full h-[340px] bg-black/80 rounded-lg border border-white/10 overflow-hidden cursor-grab active:cursor-grabbing touch-none">
+                            <div id="map-viewport-2f" class="w-full h-full origin-top-left transition-transform duration-75">
+                                <svg class="w-full h-full select-none" viewBox="0 0 640 400" preserveAspectRatio="xMinYMin meet" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Courtyard Center -->
+                                    <rect x="110" y="115" width="410" height="130" fill="#09090d" stroke="#22222b" stroke-dasharray="3 3" rx="6"/>
+                                    <text x="315" y="180" text-anchor="middle" fill="#3f3f4e" font-size="13" font-family="'Chakra Petch', sans-serif" font-weight="bold" letter-spacing="2">UFFIZI COURTYARD</text>
+
+                                    <!-- Corridors -->
+                                    <rect x="100" y="80" width="440" height="25" fill="#182238" stroke="#334155"/>
+                                    <text x="310" y="94" text-anchor="middle" fill="#94a3b8" font-size="8" font-weight="bold">A2 EASTERN CORRIDOR ➔</text>
+
+                                    <rect x="515" y="80" width="25" height="195" fill="#182238" stroke="#334155"/>
+                                    <text x="527" y="180" text-anchor="middle" fill="#94a3b8" font-size="8" font-weight="bold" transform="rotate(90 527 180)">SOUTHERN CORRIDOR A23 ⬇</text>
+
+                                    <rect x="100" y="250" width="440" height="25" fill="#182238" stroke="#334155"/>
+                                    <text x="310" y="264" text-anchor="middle" fill="#94a3b8" font-size="8" font-weight="bold">⬅ WESTERN CORRIDOR A24</text>
+
+                                    <path d="M 115 50 L 115 92 L 527 92 L 527 262 L 115 262" stroke="#EF0000" stroke-width="2.5" stroke-dasharray="5 3" fill="none" opacity="0.8"/>
+                                    <path d="M 115 50 L 115 92 L 527 92 L 527 262 L 115 262" stroke="#FFD700" stroke-width="1" fill="none"/>
+
+                                    <rect x="100" y="15" width="30" height="30" fill="#1e293b" stroke="#475569" rx="2"/>
+                                    <text x="115" y="30" text-anchor="middle" fill="#f87171" font-size="7" font-weight="bold">START 🚩</text>
+                                    <rect id="room-A1" onclick="selectArtworkByRoom('A1')" class="room-box room-blue" x="100" y="50" width="30" height="30" rx="2"/>
+                                    <text x="115" y="65" class="room-label">A1</text>
+
+                                    <!-- Top Wing Rooms -->
+                                    <rect id="room-A3" onclick="selectArtworkByRoom('A3')" class="room-box room-blue" x="15" y="80" width="80" height="25" rx="2"/>
+                                    <text x="55" y="92" class="room-label">A3</text>
+
+                                    <rect id="room-A6" onclick="selectArtworkByRoom('A6')" class="room-box room-blue" x="135" y="15" width="35" height="30" rx="2"/>
+                                    <text x="152" y="30" class="room-label">A6</text>
+                                    <rect id="room-A5" onclick="selectArtworkByRoom('A5')" class="room-box room-blue" x="135" y="48" width="35" height="30" rx="2"/>
+                                    <text x="152" y="63" class="room-label">A5</text>
+
+                                    <rect id="room-A7" onclick="selectArtworkByRoom('A7')" class="room-box room-blue" x="173" y="15" width="60" height="30" rx="2"/>
+                                    <text x="203" y="30" class="room-label">A7</text>
+                                    <rect id="room-A4" onclick="selectArtworkByRoom('A4')" class="room-box room-blue" x="173" y="48" width="60" height="30" rx="2"/>
+                                    <text x="203" y="63" class="room-label">A4 Giotto</text>
+
+                                    <rect id="room-A8" onclick="selectArtworkByRoom('A8')" class="room-box room-blue" x="236" y="15" width="35" height="30" rx="2"/>
+                                    <text x="253" y="30" class="room-label">A8</text>
+
+                                    <rect id="room-A10" onclick="selectArtworkByRoom('A10')" class="room-box room-blue" x="274" y="15" width="40" height="30" rx="2"/>
+                                    <text x="294" y="30" class="room-label">A10</text>
+                                    <rect id="room-A9" onclick="selectArtworkByRoom('A9')" class="room-box room-blue" x="236" y="48" width="78" height="30" rx="2"/>
+                                    <text x="275" y="63" class="room-label">A9 Botticelli</text>
+
+                                    <rect id="room-A11" onclick="selectArtworkByRoom('A11')" class="room-box room-blue" x="317" y="15" width="85" height="63" rx="2"/>
+                                    <text x="359" y="46" class="room-label">A11 - A12</text>
+
+                                    <rect id="room-A14" onclick="selectArtworkByRoom('A14')" class="room-box room-blue" x="405" y="15" width="30" height="30" rx="2"/>
+                                    <text x="420" y="30" class="room-label">A14</text>
+                                    <rect id="room-A13" onclick="selectArtworkByRoom('A13')" class="room-box room-blue" x="405" y="48" width="30" height="30" rx="2"/>
+                                    <text x="420" y="63" class="room-label">A13</text>
+
+                                    <rect id="room-A15" onclick="selectArtworkByRoom('A15')" class="room-box room-blue" x="438" y="48" width="25" height="30" rx="2"/>
+                                    <text x="450" y="63" class="room-label">A15</text>
+
+                                    <!-- Octagonal Tribune (A16) -->
+                                    <polygon id="room-A16" onclick="selectArtworkByRoom('A16')" class="room-box room-blue" points="475,30 495,30 505,45 505,65 495,78 475,78 465,65 465,45"/>
+                                    <text x="485" y="54" class="room-label" font-size="7">A16 Tribune</text>
+
+                                    <rect id="room-A17" onclick="selectArtworkByRoom('A17')" class="room-box room-blue" x="510" y="48" width="18" height="30" rx="1"/>
+                                    <text x="519" y="63" class="room-label" font-size="6">17</text>
+                                    <rect id="room-A18" onclick="selectArtworkByRoom('A18')" class="room-box room-blue" x="530" y="48" width="18" height="30" rx="1"/>
+                                    <text x="539" y="63" class="room-label" font-size="6">18</text>
+                                    <rect id="room-A19" onclick="selectArtworkByRoom('A19')" class="room-box room-blue" x="550" y="48" width="18" height="30" rx="1"/>
+                                    <text x="559" y="63" class="room-label" font-size="6">19</text>
+                                    <rect id="room-A20" onclick="selectArtworkByRoom('A20')" class="room-box room-blue" x="570" y="48" width="18" height="30" rx="1"/>
+                                    <text x="579" y="63" class="room-label" font-size="6">20</text>
+                                    <rect id="room-A21" onclick="selectArtworkByRoom('A21')" class="room-box room-blue" x="590" y="48" width="18" height="30" rx="1"/>
+                                    <text x="599" y="63" class="room-label" font-size="6">21</text>
+
+                                    <rect id="room-A22" onclick="selectArtworkByRoom('A22')" class="room-box room-blue" x="610" y="30" width="25" height="48" rx="2"/>
+                                    <text x="622" y="54" class="room-label" font-size="7">A22</text>
+
+                                    <!-- Right Wing Rooms -->
+                                    <rect id="room-A34" onclick="selectArtworkByRoom('A34')" class="room-box room-blue" x="543" y="110" width="35" height="32" rx="2"/>
+                                    <text x="560" y="126" class="room-label">A34</text>
+                                    <rect id="room-A25" onclick="selectArtworkByRoom('A25')" class="room-box room-blue" x="581" y="110" width="50" height="32" rx="2"/>
+                                    <text x="606" y="126" class="room-label">A25 Piero</text>
+
+                                    <rect id="room-A26" onclick="selectArtworkByRoom('A26')" class="room-box room-blue" x="581" y="145" width="50" height="32" rx="2"/>
+                                    <text x="606" y="161" class="room-label">A26</text>
+
+                                    <rect id="room-A33" onclick="selectArtworkByRoom('A33')" class="room-box room-blue" x="543" y="180" width="35" height="32" rx="2"/>
+                                    <text x="560" y="196" class="room-label">A33</text>
+                                    <rect id="room-A27" onclick="selectArtworkByRoom('A27')" class="room-box room-blue" x="581" y="180" width="50" height="32" rx="2"/>
+                                    <text x="606" y="196" class="room-label">A27</text>
+
+                                    <rect id="room-A32" onclick="selectArtworkByRoom('A32')" class="room-box room-blue" x="543" y="215" width="35" height="32" rx="2"/>
+                                    <text x="560" y="231" class="room-label">A32</text>
+                                    <rect id="room-A28" onclick="selectArtworkByRoom('A28')" class="room-box room-blue" x="581" y="215" width="50" height="32" rx="2"/>
+                                    <text x="606" y="231" class="room-label">A28</text>
+
+                                    <rect id="room-A31" onclick="selectArtworkByRoom('A31')" class="room-box room-blue" x="543" y="250" width="35" height="30" rx="2"/>
+                                    <text x="560" y="265" class="room-label">A31</text>
+                                    <rect id="room-A29" onclick="selectArtworkByRoom('A29')" class="room-box room-blue" x="581" y="250" width="23" height="30" rx="2"/>
+                                    <text x="592" y="265" class="room-label" font-size="6">A29</text>
+                                    <rect id="room-A30" onclick="selectArtworkByRoom('A30')" class="room-box room-blue" x="607" y="250" width="24" height="30" rx="2"/>
+                                    <text x="619" y="265" class="room-label" font-size="6">A30</text>
+
+                                    <!-- Bottom Wing Rooms -->
+                                    <rect id="room-A35" onclick="selectArtworkByRoom('A35')" class="room-box room-blue" x="455" y="278" width="55" height="50" rx="2"/>
+                                    <text x="482" y="303" class="room-label">A35 Da Vinci</text>
+
+                                    <rect id="room-A36" onclick="selectArtworkByRoom('A36')" class="room-box room-blue" x="410" y="278" width="42" height="28" rx="2"/>
+                                    <text x="431" y="292" class="room-label">A36</text>
+                                    <rect id="room-A37" onclick="selectArtworkByRoom('A37')" class="room-box room-blue" x="410" y="308" width="42" height="20" rx="2"/>
+                                    <text x="431" y="318" class="room-label" font-size="6">A37</text>
+
+                                    <rect id="room-A38" onclick="selectArtworkByRoom('A38')" class="room-box room-blue" x="350" y="278" width="55" height="50" rx="2"/>
+                                    <text x="377" y="303" class="room-label">A38 Raphael</text>
+
+                                    <rect id="room-A39" onclick="selectArtworkByRoom('A39')" class="room-box room-blue" x="240" y="278" width="105" height="50" rx="2"/>
+                                    <text x="292" y="303" class="room-label">A39 Niobe Room</text>
+
+                                    <rect id="room-A40" onclick="selectArtworkByRoom('A40')" class="room-box room-blue" x="195" y="278" width="40" height="23" rx="2"/>
+                                    <text x="215" y="289" class="room-label">A40</text>
+                                    <rect id="room-A41" onclick="selectArtworkByRoom('A41')" class="room-box room-blue" x="195" y="305" width="40" height="23" rx="2"/>
+                                    <text x="215" y="316" class="room-label">A41</text>
+
+                                    <rect id="room-A42" onclick="selectArtworkByRoom('A42')" class="room-box room-blue" x="145" y="278" width="45" height="50" rx="2"/>
+                                    <text x="167" y="303" class="room-label">A42</text>
+
+                                    <g id="room-terrace" onclick="selectArtworkByRoom('terrace')" class="cursor-pointer">
+                                        <rect x="15" y="250" width="80" height="110" fill="#14281d" stroke="#22543d" stroke-width="1.5" rx="4"/>
+                                        <text x="55" y="295" text-anchor="middle" fill="#48bb78" font-size="9" font-weight="bold">PANORAMIC</text>
+                                        <text x="55" y="310" text-anchor="middle" fill="#48bb78" font-size="9" font-weight="bold">TERRACE ☕</text>
+                                    </g>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- 1F Map Graphic SVG Canvas (Top-Left Aligned Viewport) -->
+                        <div id="map-graphic-1f" class="my-1 relative w-full h-[340px] bg-black/80 rounded-lg border border-white/10 overflow-hidden hidden cursor-grab active:cursor-grabbing touch-none">
+                            <div id="map-viewport-1f" class="w-full h-full origin-top-left transition-transform duration-75">
+                                <svg class="w-full h-full select-none" viewBox="0 0 640 400" preserveAspectRatio="xMinYMin meet" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Courtyard Center -->
+                                    <rect x="110" y="110" width="410" height="120" fill="#09090d" stroke="#22222b" stroke-dasharray="3 3" rx="6"/>
+                                    <text x="315" y="170" text-anchor="middle" fill="#3f3f4e" font-size="13" font-family="'Chakra Petch', sans-serif" font-weight="bold" letter-spacing="2">UFFIZI COURTYARD (1F)</text>
+
+                                    <rect x="80" y="70" width="465" height="25" fill="#1c1917" stroke="#334155"/>
+                                    <rect x="520" y="70" width="25" height="150" fill="#1c1917" stroke="#334155"/>
+                                    <text x="532" y="145" text-anchor="middle" fill="#a855f7" font-size="7" font-weight="bold" transform="rotate(90 532 145)">D27 VERONE ⬆</text>
+
+                                    <!-- GREEN SECTION (Rooms C1 - C12) -->
+                                    <rect id="room-C1" onclick="selectArtworkByRoom('C1')" class="room-box room-green" x="20" y="145" width="35" height="80" rx="2"/>
+                                    <text x="37" y="185" class="room-label">C1</text>
+                                    <rect id="room-C2" onclick="selectArtworkByRoom('C2')" class="room-box room-green" x="20" y="108" width="35" height="32" rx="2"/>
+                                    <text x="37" y="124" class="room-label">C2</text>
+                                    <rect id="room-C3" onclick="selectArtworkByRoom('C3')" class="room-box room-green" x="20" y="70" width="35" height="33" rx="2"/>
+                                    <text x="37" y="86" class="room-label">C3</text>
+
+                                    <rect id="room-C4" onclick="selectArtworkByRoom('C4')" class="room-box room-green" x="60" y="70" width="30" height="25" rx="1"/>
+                                    <text x="75" y="82" class="room-label">C4</text>
+                                    <rect id="room-C5" onclick="selectArtworkByRoom('C5')" class="room-box room-green" x="93" y="70" width="30" height="25" rx="1"/>
+                                    <text x="108" y="82" class="room-label">C5</text>
+                                    <rect id="room-C6" onclick="selectArtworkByRoom('C6')" class="room-box room-green" x="126" y="70" width="30" height="25" rx="1"/>
+                                    <text x="141" y="82" class="room-label">C6</text>
+
+                                    <!-- PURPLE SECTION -->
+                                    <rect id="room-D23" onclick="selectArtworkByRoom('D23')" class="room-box room-purple" x="486" y="164" width="55" height="40" rx="1"/>
+                                    <text x="513" y="184" class="room-label">D23 Titian</text>
+
+                                    <!-- TEAL SECTION -->
+                                    <rect id="room-E5" onclick="selectArtworkByRoom('E5')" class="room-box room-teal" x="457" y="12" width="38" height="35" rx="2"/>
+                                    <text x="476" y="29" class="room-label">E5 Caravaggio</text>
+                                    <rect id="room-E4" onclick="selectArtworkByRoom('E4')" class="room-box room-teal" x="498" y="12" width="38" height="35" rx="2"/>
+                                    <text x="517" y="29" class="room-label">E4 Artemisia</text>
+
+                                    <!-- Exit -->
+                                    <rect x="335" y="12" width="30" height="35" fill="#1e293b" stroke="#475569" rx="2"/>
+                                    <text x="350" y="29" text-anchor="middle" fill="#38bdf8" font-size="7" font-weight="bold">EXIT 🚪</text>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between text-[13px] text-gray-300 font-tech bg-black/80 p-2 rounded-lg border border-white/10">
+                            <span class="flex items-center gap-1"><i data-lucide="hand" class="w-3.5 h-3.5 text-ferrari-yellow"></i> 支援單手指左右拖曳 & 雙指縮放</span>
+                            <span id="flashing-room-tag" class="text-ferrari-gold font-bold">閃爍區域: A9 展廳</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Itinerary Route Steps -->
+                <div class="carbon-card p-4 rounded-2xl border border-white/10">
+                    <h3 class="text-[17px] font-bold text-metal mb-2 flex items-center gap-2">
+                        <i data-lucide="route" class="w-4 h-4 text-ferrari-red"></i> 推薦觀賞順序 Sequence Guide
+                    </h3>
+                    <div id="route-steps" class="space-y-2">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Info & Viewpoints Tab -->
+            <div id="tab-info" class="p-4 hidden space-y-4">
+                
+                <!-- 參觀叮嚀與貼心提示卡片 -->
+                <div class="carbon-card p-4 rounded-2xl border border-white/10 space-y-3">
+                    <h2 class="text-[19px] font-bold text-metal flex items-center gap-2">
+                        <i data-lucide="info" class="w-4 h-4 text-ferrari-red"></i> 參觀叮嚀與貼心提示
+                    </h2>
+                    
+                    <div class="space-y-2.5 text-[15px]">
+                        <div class="p-3 bg-black/40 rounded-xl border border-white/10 flex items-start gap-3">
+                            <div class="w-7 h-7 rounded-lg bg-ferrari-red/20 border border-ferrari-red/40 flex items-center justify-center text-ferrari-red shrink-0 mt-0.5">
+                                <i data-lucide="clock" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-ferrari-gold">開館時間 (Opening Hours)</div>
+                                <p class="text-gray-300 mt-0.5">08:15 - 18:30（每週一休館）。</p>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-black/40 rounded-xl border border-white/10 flex items-start gap-3">
+                            <div class="w-7 h-7 rounded-lg bg-ferrari-red/20 border border-ferrari-red/40 flex items-center justify-center text-ferrari-red shrink-0 mt-0.5">
+                                <i data-lucide="footprints" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-ferrari-gold">參觀時間與穿著 (Tips)</div>
+                                <p class="text-gray-300 mt-0.5">館內極大，全看完約需 3 小時，請穿著舒適好走之休閒鞋。</p>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-black/40 rounded-xl border border-white/10 flex items-start gap-3">
+                            <div class="w-7 h-7 rounded-lg bg-ferrari-red/20 border border-ferrari-red/40 flex items-center justify-center text-ferrari-red shrink-0 mt-0.5">
+                                <i data-lucide="camera-off" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-ferrari-gold">拍照與攝影規定 (Rules)</div>
+                                <p class="text-gray-300 mt-0.5">部分展區禁止閃光燈，拍照請遵守規定與現場工作人員指引。</p>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-black/40 rounded-xl border border-white/10 flex items-start gap-3">
+                            <div class="w-7 h-7 rounded-lg bg-ferrari-red/20 border border-ferrari-red/40 flex items-center justify-center text-ferrari-red shrink-0 mt-0.5">
+                                <i data-lucide="map-pin" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-ferrari-gold">出口地點與延伸景點 (Exit)</div>
+                                <p class="text-gray-300 mt-0.5">出口處位於傭兵涼廊 (Loggia dei Lanzi)，可一併欣賞精彩的大理石與青銅雕像作品。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Viewpoints Card -->
+                <div class="carbon-card p-4 rounded-2xl border border-white/10 space-y-3">
+                    <h2 class="text-[19px] font-bold text-metal flex items-center gap-2">
+                        <i data-lucide="camera" class="w-4 h-4 text-ferrari-red"></i> 館內絕佳觀景點 (Viewpoints)
+                    </h2>
+                    
+                    <div class="space-y-2 text-[15px]">
+                        <div class="p-3 bg-black/40 rounded-xl border border-white/10">
+                            <div class="font-bold text-ferrari-gold flex items-center justify-between">
+                                <span>觀景點 1：文藝復興迴廊天花板</span>
+                                <span class="text-[13px] font-tech text-gray-400">2F 東迴廊</span>
+                            </div>
+                            <p class="text-gray-400 mt-1">滿滿畫作裝飾的迴廊天花板，兩側擺滿大理石雕像，氣派尊貴。</p>
+                        </div>
+
+                        <div class="p-3 bg-black/40 rounded-xl border border-white/10">
+                            <div class="font-bold text-ferrari-gold flex items-center justify-between">
+                                <span>觀景點 2：遠眺恩寵橋 Ponte alle Grazie</span>
+                                <span class="text-[13px] font-tech text-gray-400">2F 南迴廊盡頭</span>
+                            </div>
+                            <p class="text-gray-400 mt-1">南迴廊觀景大窗，可拍攝阿諾河與東側恩寵橋的極佳景色。</p>
+                        </div>
+
+                        <div class="p-3 bg-black/40 rounded-xl border border-white/10">
+                            <div class="font-bold text-ferrari-gold flex items-center justify-between">
+                                <span>觀景點 3：老橋 (Ponte Vecchio) 與阿諾河</span>
+                                <span class="text-[13px] font-tech text-gray-400">2F 西迴廊入口</span>
+                            </div>
+                            <p class="text-gray-400 mt-1">烏菲茲最著名取景點，明信片般的佛羅倫斯老橋河畔風光。</p>
+                        </div>
+
+                        <div class="p-3 bg-black/40 rounded-xl border border-white/10">
+                            <div class="font-bold text-ferrari-gold flex items-center justify-between">
+                                <span>觀景點 4：聖母百花大教堂圓頂</span>
+                                <span class="text-[13px] font-tech text-gray-400">2F 露臺咖啡廳</span>
+                            </div>
+                            <p class="text-gray-400 mt-1">與烏菲茲美術館迴廊及百花大教堂圓頂同框入鏡。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Supercar Floating Navigation Bar -->
+        <div class="dock-safe-area rounded-2xl px-4 py-2 flex items-center justify-between">
+            <!-- Mini Player Quick Status -->
+            <div class="flex items-center gap-3 cursor-pointer flex-1 min-w-0" onclick="openArtworkModal()">
+                <img id="player-thumb" src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg/200px-Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg" 
+                    alt="Current Artwork" class="w-9 h-9 rounded-lg object-cover border border-ferrari-red">
+                <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-1.5">
+                        <span id="player-room" class="text-[12px] font-tech bg-ferrari-red text-white px-1 rounded font-bold">A9展廳</span>
+                        <h4 id="player-title" class="text-[15px] font-bold text-white truncate">維納斯的誕生</h4>
+                    </div>
+                    <p id="player-artist" class="text-[13px] text-gray-400 truncate">桑德羅·波提切利</p>
+                    <div class="w-full bg-black/60 rounded-full h-1 mt-1 overflow-hidden">
+                        <div id="audio-progress-bar" class="bg-gradient-to-r from-ferrari-yellow to-ferrari-red h-full w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Play & Pause Control -->
+            <button onclick="toggleAudioSpeech()" id="player-play-btn" class="w-9 h-9 rounded-full bg-ferrari-red text-white flex items-center justify-center led-red hover:scale-105 active:scale-95 transition ml-2">
+                <i id="play-icon" data-lucide="play" class="w-4 h-4 ml-0.5"></i>
+            </button>
+
+            <div class="h-6 w-[1px] bg-white/10 mx-2"></div>
+
+            <!-- Navigation Tabs -->
+            <div class="flex items-center gap-3">
+                <button onclick="switchTab('artworks')" id="nav-artworks" class="nav-btn active text-ferrari-red">
+                    <i data-lucide="palette" class="w-5 h-5"></i>
+                </button>
+                <button onclick="switchTab('map')" id="nav-map" class="nav-btn text-gray-500 hover:text-white">
+                    <i data-lucide="map-pin" class="w-5 h-5"></i>
+                </button>
+                <button onclick="switchTab('info')" id="nav-info" class="nav-btn text-gray-500 hover:text-white">
+                    <i data-lucide="compass" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Artwork Detailed Modal -->
+        <div id="artwork-modal" class="fixed inset-0 bg-black/95 z-50 flex flex-col hidden overflow-y-auto backdrop-blur-2xl">
+            <!-- Modal Header -->
+            <div class="sticky top-0 bg-[#111114]/90 backdrop-blur border-b border-white/10 px-4 py-3 flex items-center justify-between z-20">
+                <button onclick="closeArtworkModal()" class="p-2 text-gray-400 hover:text-white bg-black/40 rounded-xl border border-white/10">
+                    <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                </button>
+                <span class="text-[15px] font-tech font-bold text-metal tracking-widest uppercase">UFFIZI AUDIO GUIDE</span>
+                <button onclick="toggleCurrentFavorite()" id="modal-fav-btn" class="p-2 text-gray-400 hover:text-ferrari-yellow bg-black/40 rounded-xl border border-white/10">
+                    <i data-lucide="bookmark" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content Body -->
+            <div class="p-5 space-y-5 flex-1">
+                <div class="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black">
+                    <img id="modal-image" src="" alt="Artwork" class="w-full h-[260px] object-contain">
+                    <span id="modal-room-badge" class="absolute top-3 left-3 bg-ferrari-red text-white font-tech text-[15px] font-black px-2.5 py-1 rounded-lg led-red">
+                        展廳 A9
+                    </span>
+                </div>
+
+                <div class="space-y-1">
+                    <h2 id="modal-title" class="text-[22px] font-black text-metal">維納斯的誕生</h2>
+                    <div class="flex items-center gap-2 text-[15px] font-tech text-ferrari-gold">
+                        <span id="modal-artist">桑德羅·波提切利 (Sandro Botticelli)</span>
+                        <span>·</span>
+                        <span id="modal-year" class="text-gray-400">c. 1485</span>
+                    </div>
+                </div>
+
+                <!-- Dashboard Audio Control Console -->
+                <div class="p-4 rounded-2xl carbon-card border border-ferrari-red/40 space-y-3">
+                    <div class="flex items-center justify-between text-[15px] font-tech">
+                        <span class="text-gray-300 flex items-center gap-1"><i data-lucide="volume-2" class="w-3.5 h-3.5 text-ferrari-red"></i> 語音導覽播放 (Speech Synthesis)</span>
+                        <span id="modal-audio-time" class="text-ferrari-gold font-bold">00:00 / 02:30</span>
+                    </div>
+
+                    <input type="range" id="modal-audio-slider" min="0" max="100" value="0" oninput="seekAudio(this.value)"
+                        class="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-ferrari-red">
+
+                    <div class="flex items-center justify-between pt-1">
+                        <button onclick="changeSpeed()" id="modal-speed-btn" class="text-[14px] font-tech text-gray-300 bg-black/50 px-2.5 py-1 rounded border border-white/10 hover:text-white">
+                            1.0x 語速
+                        </button>
+
+                        <div class="flex items-center gap-4">
+                            <button onclick="rewindAudio(10)" class="text-gray-400 hover:text-white p-2">
+                                <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+                            </button>
+                            <button onclick="toggleAudioSpeech()" id="modal-play-btn" class="w-12 h-12 rounded-full bg-ferrari-red text-white flex items-center justify-center led-red hover:scale-105 active:scale-95 transition">
+                                <i id="modal-play-icon" data-lucide="play" class="w-6 h-6 ml-0.5"></i>
+                            </button>
+                            <button onclick="forwardAudio(10)" class="text-gray-400 hover:text-white p-2">
+                                <i data-lucide="rotate-cw" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+
+                        <button onclick="readAudioSpeech()" class="text-[14px] font-tech text-ferrari-gold bg-black/50 px-2.5 py-1 rounded border border-white/10">
+                            重頭播放
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <h3 class="text-[17px] font-bold text-metal flex items-center gap-1.5 border-b border-white/10 pb-2">
+                        <i data-lucide="file-text" class="w-4 h-4 text-ferrari-red"></i> 導覽解說與賞析重點
+                    </h3>
+                    <p id="modal-description" class="text-[15px] leading-relaxed text-gray-300 space-y-2">
+                    </p>
+                </div>
+
+                <div class="p-3 bg-black/40 rounded-xl border border-white/10 space-y-1.5">
+                    <span class="text-[14px] font-tech font-bold text-ferrari-gold flex items-center gap-1">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> 現場必看細節 (Key Details)
+                    </span>
+                    <ul id="modal-highlights" class="text-[15px] text-gray-400 space-y-1 list-disc list-inside">
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        /* ARTWORK DATABASE */
+        const artworksData = [
+            {
+                id: 'giotto',
+                title: '《寶座聖母》 (Ognissanti Madonna)',
+                artist: '喬托 (Giotto)',
+                year: 'c. 1310',
+                floor: '2F',
+                room: 'A4 展廳',
+                roomCode: 'A4',
+                img: 'http://www.ss.net.tw/file/Giotto003/file1.jpg',
+                audioText: '喬托的《寶座聖母》被譽為西方藝術文藝復興的曙光。打破中世紀哥德繪畫風格，賦予聖母與聖嬰真實的人體質量與空間感。',
+                highlights: [
+                    '聖母軀幹的立體厚重質感與自然垂墜衣褶',
+                    '傳統金箔背景下突破性的空間深度嘗試',
+                    '跪地天使獻花的虔誠自然表情'
+                ],
+                tourMode: ['classic', 'complete']
+            },
+            {
+                id: 'uccello',
+                title: '《聖羅馬諾戰役》 (The Battle of San Romano)',
+                artist: '烏切洛 (Paolo Uccello)',
+                year: 'c. 1435–1440',
+                floor: '2F',
+                room: 'A8 展廳',
+                roomCode: 'A8',
+                img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/La_batalla_de_San_Romano%2C_por_Paolo_Uccello.jpg/960px-La_batalla_de_San_Romano%2C_por_Paolo_Uccello.jpg?utm_source=zh.wikipedia.org&utm_campaign=parser&utm_content=thumbnail',
+                audioText: '烏切洛對「透視法」極致著迷，巧妙利用地面散落的折斷槍矛與盔甲，構成強烈的幾何透視網格。',
+                highlights: [
+                    '地上斷槍排成的數學透視消失線',
+                    '騎士盔甲上的金屬光澤與幾何結構'
+                ],
+                tourMode: ['classic', 'complete']
+            },
+            {
+                id: 'piero',
+                title: '《烏爾比諾公爵夫婦肖像》',
+                artist: '皮耶羅・德拉・弗朗切斯卡',
+                year: 'c. 1465–1472',
+                floor: '2F',
+                room: 'A25 展廳',
+                roomCode: 'A25',
+                img: 'https://upload.wikimedia.org/wikipedia/commons/8/86/Piero_della_Francesca_044.jpg?utm_source=zh.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+                audioText: '經典雙聯側面肖像畫，描繪烏爾比諾公爵與亡妻，背景呈現無限延伸的浩瀚領地風光。',
+                highlights: [
+                    '公爵經典鷹鉤鼻與側面嚴肅輪廓',
+                    '公爵夫人蒼白典雅的服飾與珍珠飾品細節'
+                ],
+                tourMode: ['classic', 'complete']
+            },
+            {
+                id: 'botticelli-spring',
+                title: '《春》 (Primavera)',
+                artist: '桑德羅・波提切利 (Sandro Botticelli)',
+                year: 'c. 1480',
+                floor: '2F',
+                room: 'A9 展廳',
+                roomCode: 'A9',
+                img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/25/Sandro_Botticelli_-_La_Primavera_-_Google_Art_Project.jpg/1920px-Sandro_Botticelli_-_La_Primavera_-_Google_Art_Project.jpg?utm_source=zh.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+                audioText: '中央為愛神維納斯，右側西風之神追逐花神，左側三美神起舞。細緻刻畫了超過500種真實植物。',
+                highlights: [
+                    '三美神薄紗透光衣裳與優美舞蹈線條',
+                    '花神撒落玫瑰花瓣的優雅姿態'
+                ],
+                tourMode: ['fast', 'classic', 'complete']
+            },
+            {
+                id: 'botticelli-venus',
+                title: '《維納斯的誕生》 (The Birth of Venus)',
+                artist: '桑德羅・波提切利 (Sandro Botticelli)',
+                year: 'c. 1485',
+                floor: '2F',
+                room: 'A9 展廳',
+                roomCode: 'A9',
+                img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0b/Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg/1920px-Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg?utm_source=zh.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+                audioText: '烏菲茲鎮館之寶！展示美之女神維納斯從海洋的巨貝中誕生的經典瞬間，呈經典S型體態曲線。',
+                highlights: [
+                    '金色長髮與S型經典姿態',
+                    '西風之神吹送的花瓣與海浪金色波紋'
+                ],
+                tourMode: ['fast', 'classic', 'complete']
+            },
+            {
+                id: 'tribune',
+                title: '《美第奇維納斯》與八角廳 (Tribune)',
+                artist: '古典雕塑',
+                year: '1st Century BC',
+                floor: '2F',
+                room: 'A16 展廳',
+                roomCode: 'A16',
+                img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Cleomene_di_Apollodoro%2C_venere_medici%2C_I_secolo_ac_ca.jpg/960px-Cleomene_di_Apollodoro%2C_venere_medici%2C_I_secolo_ac_ca.jpg?utm_source=zh.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+                audioText: '八角廳是烏菲茲最奢華的陳列室，穹頂由數千片珍珠貝母鑲嵌而成，中央展出《美第奇維納斯》。',
+                highlights: [
+                    '八角穹頂鑲嵌珍珠貝母',
+                    '古典大理石雕塑《美第奇維納斯》'
+                ],
+                tourMode: ['classic', 'complete']
+            },
+            {
+                id: 'davinci-annunciation',
+                title: '《天使報喜》 (Annunciation)',
+                artist: '李奧納多・達文西 (Leonardo da Vinci)',
+                year: 'c. 1472–1475',
+                floor: '2F',
+                room: 'A35 展廳',
+                roomCode: 'A35',
+                img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3b/Annunciation_%28Leonardo%29.jpg/960px-Annunciation_%28Leonardo%29.jpg?utm_source=zh.wikipedia.org&utm_campaign=parser&utm_content=thumbnail',
+                audioText: '達文西年輕時期的傑作。天使加百列降臨向聖母瑪利亞傳達懷孕福音，展現完美的大氣透視法。',
+                highlights: [
+                    '天使加百列極其寫實的羽毛翅膀',
+                    '遠方漸層薄霧的大氣透視法'
+                ],
+                tourMode: ['fast', 'classic', 'complete']
+            },
+            {
+                id: 'michelangelo-doni',
+                title: '《聖家族》/ 多尼圓畫 (Doni Tondo)',
+                artist: '米開朗基羅 (Michelangelo)',
+                year: 'c. 1506',
+                floor: '2F',
+                room: 'A38 展廳',
+                roomCode: 'A38',
+                img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e1/Tondo_Doni%2C_por_Miguel_Ángel.jpg/1280px-Tondo_Doni%2C_por_Miguel_Ángel.jpg?utm_source=zh.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+                audioText: '米開朗基羅唯一保存完好的木板畫。聖母、聖約瑟與聖嬰呈現極具肌肉動感的扭轉姿態。',
+                highlights: [
+                    '軀幹扭轉的動態肌肉感',
+                    '如金屬般鮮豔俐落的色彩對比'
+                ],
+                tourMode: ['fast', 'classic', 'complete']
+            },
+            {
+                id: 'raphael-goldfinch',
+                title: '《金翅雀聖母》 (Madonna of the Goldfinch)',
+                artist: '拉斐爾 (Raphael)',
+                year: 'c. 1505–1506',
+                floor: '2F',
+                room: 'A38 展廳',
+                roomCode: 'A38',
+                img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/57/Raffaello_Sanzio_-_Madonna_del_Cardellino_-_Google_Art_Project.jpg/960px-Raffaello_Sanzio_-_Madonna_del_Cardellino_-_Google_Art_Project.jpg?utm_source=zh.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+                audioText: '盛期文藝復興和諧美感的代表。採用經典金字塔三角形構圖，色彩溫潤柔和。',
+                highlights: [
+                    '完美穩定的金字塔三角構圖',
+                    '小約翰與小耶穌溫馨眼神互動'
+                ],
+                tourMode: ['fast', 'classic', 'complete']
+            },
+            {
+                id: 'titian-venus',
+                title: '《烏爾比諾的維納斯》 (Venus of Urbino)',
+                artist: '提香 (Titian)',
+                year: '1538',
+                floor: '1F',
+                room: 'D23 展廳',
+                roomCode: 'D23',
+                img: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Tizian_-_Venus_von_Urbino.jpg?utm_source=zh.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+                audioText: '威尼斯畫派大師提香開創西洋藝術「臥姿裸女」經典構圖，自信直視觀者。',
+                highlights: [
+                    '維納斯自信從容的眼神與溫暖膚色',
+                    '腳邊蜷縮沉睡的小狗'
+                ],
+                tourMode: ['classic', 'complete']
+            },
+            {
+                id: 'gentileschi-judith',
+                title: '《友弟德斬首敵將》',
+                artist: '真蒂萊希 (Artemisia Gentileschi)',
+                year: 'c. 1620',
+                floor: '1F',
+                room: 'E4 展廳',
+                roomCode: 'E4',
+                img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b7/Judit_decapitando_a_Holofernes%2C_por_Artemisia_Gentileschi.jpg/1280px-Judit_decapitando_a_Holofernes%2C_por_Artemisia_Gentileschi.jpg?utm_source=zh.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+                audioText: '巴洛克女性畫家真蒂萊希代表作，呈現猶太女英雄將敵將斬首的場面，極具卡拉瓦喬式的光影張力。',
+                highlights: [
+                    '友弟德手臂發力的強烈動態',
+                    '劇烈光影對比 (Chiaroscuro)'
+                ],
+                tourMode: ['classic', 'complete']
+            },
+            {
+                id: 'caravaggio-medusa',
+                title: '《梅杜莎》 (Medusa)',
+                artist: '卡拉瓦喬 (Caravaggio)',
+                year: 'c. 1597',
+                floor: '1F',
+                room: 'E5 展廳',
+                roomCode: 'E5',
+                img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/15/Caravaggio_-_Medusa_-_Google_Art_Project.jpg/960px-Caravaggio_-_Medusa_-_Google_Art_Project.jpg?utm_source=zh.wikipedia.org&utm_campaign=parser&utm_content=thumbnail',
+                audioText: '繪製於凸面盾牌上的傑作，描繪蛇髮女妖梅杜莎被斬首瞬間驚恐神情。',
+                highlights: [
+                    '凸面盾牌上的立體錯覺',
+                    '蛇髮狂亂扭動與張口慘叫的驚悚張力'
+                ],
+                tourMode: ['fast', 'classic', 'complete']
+            }
+        ];
+
+        /* APPLICATION STATE */
+        let currentTab = 'artworks';
+        let currentArtwork = artworksData.find(a => a.id === 'botticelli-venus');
+        let currentMode = 'complete';
+        let activeFloorFilter = 'all';
+        let favorites = new Set(JSON.parse(localStorage.getItem('uffizi_favs') || '[]'));
+        let visited = new Set(JSON.parse(localStorage.getItem('uffizi_visited') || '[]'));
+        let showFavoritesOnly = false;
+
+        /* Map Interactive State: INITIALIZED TO TOP-LEFT (0,0) ALIGNMENT AT 2.0 (200% SIZE) */
+        let currentActiveFloor = '2F';
+        let mapScale = 2.0; // 預設 200% 大小
+        let mapPanX = 0;   // 置左 0 原點對齊
+        let mapPanY = 0;   // 置頂 0 原點對齊
+        let isMapDragging = false;
+        let mapDragStartX = 0;
+        let mapDragStartY = 0;
+
+        /* Speech Synthesis States */
+        let isPlaying = false;
+        let speechProgressTimer = null;
+        let playbackSpeed = 1.0;
+        let playProgressPercent = 0;
+
+        /* Initializer */
+        window.onload = function() {
+            lucide.createIcons();
+            renderArtworkList();
+            renderRouteSteps();
+            updateProgressStats();
+            updatePlayerBarUI();
+            
+            initInteractiveMapEvents();
+            if (currentArtwork) {
+                switchMapFloor(currentArtwork.floor);
+                highlightRoomOnMap(currentArtwork.roomCode);
+            }
+        };
+
+        /* Switch Navigation Tabs */
+        function switchTab(tabName) {
+            currentTab = tabName;
+            ['artworks', 'map', 'info'].forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                const navBtn = document.getElementById(`nav-${t}`);
+                if (t === tabName) {
+                    el.classList.remove('hidden');
+                    navBtn.classList.add('text-ferrari-red');
+                    navBtn.classList.remove('text-gray-500');
+                } else {
+                    el.classList.add('hidden');
+                    navBtn.classList.remove('text-ferrari-red');
+                    navBtn.classList.add('text-gray-500');
+                }
+            });
+
+            if (tabName === 'map' && currentArtwork) {
+                switchMapFloor(currentArtwork.floor);
+                highlightRoomOnMap(currentArtwork.roomCode);
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function filterByFloor(floor) {
+            activeFloorFilter = floor;
+            document.querySelectorAll('.floor-tab-btn').forEach(btn => {
+                btn.classList.remove('bg-ferrari-red', 'text-white', 'border-ferrari-red', 'active');
+                btn.classList.add('bg-carbon-pattern', 'text-gray-300', 'border-gray-700');
+            });
+            event.currentTarget.classList.add('bg-ferrari-red', 'text-white', 'border-ferrari-red', 'active');
+            event.currentTarget.classList.remove('bg-carbon-pattern', 'text-gray-300', 'border-gray-700');
+            renderArtworkList();
+        }
+
+        function filterArtworks() {
+            renderArtworkList();
+        }
+
+        function toggleFavoriteFilter() {
+            showFavoritesOnly = !showFavoritesOnly;
+            const btn = document.getElementById('fav-filter-btn');
+            if (showFavoritesOnly) {
+                btn.classList.add('text-ferrari-yellow', 'border-ferrari-yellow');
+            } else {
+                btn.classList.remove('text-ferrari-yellow', 'border-ferrari-yellow');
+            }
+            renderArtworkList();
+        }
+
+        function changeTourMode(mode) {
+            currentMode = mode;
+            renderArtworkList();
+            renderRouteSteps();
+        }
+
+        function renderArtworkList() {
+            const searchKeyword = document.getElementById('search-input').value.toLowerCase().trim();
+            const container = document.getElementById('artwork-list');
+            container.innerHTML = '';
+
+            const filtered = artworksData.filter(item => {
+                const matchMode = item.tourMode.includes(currentMode);
+                const matchFloor = activeFloorFilter === 'all' || item.floor === activeFloorFilter;
+                const matchSearch = item.title.toLowerCase().includes(searchKeyword) || 
+                                    item.artist.toLowerCase().includes(searchKeyword) || 
+                                    item.room.toLowerCase().includes(searchKeyword);
+                const matchFav = !showFavoritesOnly || favorites.has(item.id);
+                return matchMode && matchFloor && matchSearch && matchFav;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="p-8 text-center text-gray-500 text-[15px]">
+                        <i data-lucide="search-x" class="w-8 h-8 mx-auto mb-2 text-gray-600"></i>
+                        沒有找到符合條件的展品
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            filtered.forEach(item => {
+                const isFav = favorites.has(item.id);
+                const isVisited = visited.has(item.id);
+                const isCurrent = currentArtwork && currentArtwork.id === item.id;
+
+                const card = document.createElement('div');
+                card.className = `carbon-card rounded-2xl p-3 flex gap-3 items-center cursor-pointer transition ${isCurrent ? 'carbon-card-active' : ''}`;
+                card.onclick = () => selectArtwork(item);
+
+                card.innerHTML = `
+                    <div class="relative w-20 h-20 rounded-xl overflow-hidden bg-black flex-shrink-0 border border-white/10">
+                        <img src="${item.img}" alt="${item.title}" class="w-full h-full object-cover">
+                        <span class="absolute top-1 left-1 bg-ferrari-red/90 text-white font-tech text-[12px] font-bold px-1.5 py-0.2 rounded">
+                            ${item.roomCode}
+                        </span>
+                        ${isVisited ? '<span class="absolute bottom-1 right-1 bg-emerald-600 text-white rounded-full p-0.5"><i data-lucide="check" class="w-2.5 h-2.5"></i></span>' : ''}
+                    </div>
+                    <div class="flex-1 min-w-0 space-y-1">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-[15px] font-bold text-white truncate">${item.title}</h3>
+                            <button onclick="event.stopPropagation(); toggleFavorite('${item.id}')" class="text-gray-400 hover:text-ferrari-yellow p-1">
+                                <i data-lucide="bookmark" class="w-3.5 h-3.5 ${isFav ? 'text-ferrari-yellow fill-ferrari-yellow' : ''}"></i>
+                            </button>
+                        </div>
+                        <p class="text-[14px] text-gray-400 truncate">${item.artist}</p>
+                        <div class="flex items-center gap-2 text-[13px] text-gray-500 font-tech">
+                            <span><i data-lucide="clock" class="w-3 h-3 inline"></i> 2.5 min</span>
+                            <span>•</span>
+                            <span class="text-ferrari-gold font-bold">${item.floor} (${item.roomCode})</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            lucide.createIcons();
+        }
+
+        function selectArtwork(item) {
+            currentArtwork = item;
+            visited.add(item.id);
+            localStorage.setItem('uffizi_visited', JSON.stringify([...visited]));
+            updateProgressStats();
+            renderArtworkList();
+            updatePlayerBarUI();
+            
+            // 自動切換地圖樓層並讓地圖對應區域閃爍
+            switchMapFloor(item.floor);
+            highlightRoomOnMap(item.roomCode);
+            openArtworkModal();
+            readAudioSpeech();
+        }
+
+        function selectArtworkByRoom(roomCode) {
+            const found = artworksData.find(a => a.roomCode === roomCode);
+            if (found) {
+                selectArtwork(found);
+            } else {
+                highlightRoomOnMap(roomCode);
+            }
+        }
+
+        /* HIGHLIGHT & PULSE/FLASH ACTIVE ROOM ON MAP */
+        function highlightRoomOnMap(roomCode) {
+            // 清除現有閃爍標示
+            document.querySelectorAll('.room-box').forEach(el => {
+                el.classList.remove('active-room');
+            });
+            if (!roomCode) return;
+
+            // 尋找目標房間元素並添加 active-room 閃爍 Class
+            const target = document.getElementById(`room-${roomCode}`);
+            if (target) {
+                target.classList.add('active-room');
+                
+                // 提示文字連動更新
+                const tagEl = document.getElementById('flashing-room-tag');
+                if (tagEl) {
+                    tagEl.innerHTML = `<span class="animate-pulse text-ferrari-yellow">⚡ 展廳 ${roomCode} 閃爍定位中</span>`;
+                }
+            }
+        }
+
+        function toggleFavorite(id) {
+            if (favorites.has(id)) {
+                favorites.delete(id);
+            } else {
+                favorites.add(id);
+            }
+            localStorage.setItem('uffizi_favs', JSON.stringify([...favorites]));
+            renderArtworkList();
+            updateModalFavButton();
+        }
+
+        function toggleCurrentFavorite() {
+            if (currentArtwork) {
+                toggleFavorite(currentArtwork.id);
+            }
+        }
+
+        function updateModalFavButton() {
+            if (!currentArtwork) return;
+            const isFav = favorites.has(currentArtwork.id);
+            const btn = document.getElementById('modal-fav-btn');
+            if (btn) {
+                btn.innerHTML = `<i data-lucide="bookmark" class="w-5 h-5 ${isFav ? 'text-ferrari-yellow fill-ferrari-yellow' : ''}"></i>`;
+                lucide.createIcons();
+            }
+        }
+
+        function updateProgressStats() {
+            const vCount = document.getElementById('visited-count');
+            const tCount = document.getElementById('total-count');
+            if (vCount) vCount.innerText = visited.size;
+            if (tCount) tCount.innerText = artworksData.length;
+        }
+
+        /* Switch Map Floor & Keep Top-Left Alignment */
+        function switchMapFloor(floor) {
+            currentActiveFloor = floor;
+            document.getElementById('map-floor-title').innerText = floor === '2F' ? 'SECOND FLOOR (2F Galleria 二樓主展廳)' : 'FIRST FLOOR (1F Nobile 一樓展區)';
+            const btn2f = document.getElementById('btn-map-2f');
+            const btn1f = document.getElementById('btn-map-1f');
+            const map2f = document.getElementById('map-graphic-2f');
+            const map1f = document.getElementById('map-graphic-1f');
+
+            if (floor === '2F') {
+                btn2f.className = 'text-xs px-2.5 py-1 rounded-lg font-bold bg-ferrari-red text-white';
+                btn1f.className = 'text-xs px-2.5 py-1 rounded-lg font-bold text-gray-400 hover:text-white';
+                map2f.classList.remove('hidden');
+                map1f.classList.add('hidden');
+            } else {
+                btn1f.className = 'text-xs px-2.5 py-1 rounded-lg font-bold bg-ferrari-red text-white';
+                btn2f.className = 'text-xs px-2.5 py-1 rounded-lg font-bold text-gray-400 hover:text-white';
+                map1f.classList.remove('hidden');
+                map2f.classList.add('hidden');
+            }
+
+            applyMapTransform();
+
+            if (currentArtwork) {
+                highlightRoomOnMap(currentArtwork.roomCode);
+            }
+        }
+
+        /* Map Interactive Pan & Zoom Logic (Default Top-Left 0,0 Alignment) */
+        function applyMapTransform() {
+            const viewport = document.getElementById(`map-viewport-${currentActiveFloor.toLowerCase()}`);
+            if (viewport) {
+                viewport.style.transform = `translate(${mapPanX}px, ${mapPanY}px) scale(${mapScale})`;
+            }
+        }
+
+        function zoomMap(delta) {
+            mapScale = Math.min(Math.max(1.0, mapScale + delta), 3.5);
+            applyMapTransform();
+        }
+
+        function resetMapZoom() {
+            mapScale = 2.0; // 重設為 200%
+            mapPanX = 0;   // 重設為置左原點
+            mapPanY = 0;   // 重設為置頂原點
+            applyMapTransform();
+        }
+
+        /* 順暢單手指拖曳滑動地圖機制 */
+        function initInteractiveMapEvents() {
+            ['2f', '1f'].forEach(floor => {
+                const container = document.getElementById(`map-graphic-${floor}`);
+                if (!container) return;
+
+                // 滑鼠拖曳 (Mouse Events)
+                container.addEventListener('mousedown', (e) => {
+                    isMapDragging = true;
+                    mapDragStartX = e.clientX - mapPanX;
+                    mapDragStartY = e.clientY - mapPanY;
+                });
+
+                window.addEventListener('mousemove', (e) => {
+                    if (!isMapDragging) return;
+                    mapPanX = e.clientX - mapDragStartX;
+                    mapPanY = e.clientY - mapDragStartY;
+                    applyMapTransform();
+                });
+
+                window.addEventListener('mouseup', () => {
+                    isMapDragging = false;
+                });
+
+                // 單手指觸控拖曳 (Single-finger Touch Swiping)
+                let initialTouchDistance = null;
+
+                container.addEventListener('touchstart', (e) => {
+                    if (e.touches.length === 1) {
+                        isMapDragging = true;
+                        mapDragStartX = e.touches[0].clientX - mapPanX;
+                        mapDragStartY = e.touches[0].clientY - mapPanY;
+                    } else if (e.touches.length === 2) {
+                        isMapDragging = false;
+                        initialTouchDistance = Math.hypot(
+                            e.touches[0].clientX - e.touches[1].clientX,
+                            e.touches[0].clientY - e.touches[1].clientY
+                        );
+                    }
+                }, { passive: true });
+
+                container.addEventListener('touchmove', (e) => {
+                    if (isMapDragging && e.touches.length === 1) {
+                        e.preventDefault(); // 阻止背景滾動，達成順暢單指視窗內左右/上下滑動
+                        mapPanX = e.touches[0].clientX - mapDragStartX;
+                        mapPanY = e.touches[0].clientY - mapDragStartY;
+                        applyMapTransform();
+                    } else if (e.touches.length === 2 && initialTouchDistance) {
+                        e.preventDefault();
+                        const dist = Math.hypot(
+                            e.touches[0].clientX - e.touches[1].clientX,
+                            e.touches[0].clientY - e.touches[1].clientY
+                        );
+                        const delta = (dist - initialTouchDistance) * 0.005;
+                        mapScale = Math.min(Math.max(1.0, mapScale + delta), 3.5);
+                        initialTouchDistance = dist;
+                        applyMapTransform();
+                    }
+                }, { passive: false });
+
+                container.addEventListener('touchend', () => {
+                    isMapDragging = false;
+                    initialTouchDistance = null;
+                });
+
+                // 滑鼠滾輪縮放
+                container.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    const delta = e.deltaY < 0 ? 0.2 : -0.2;
+                    zoomMap(delta);
+                }, { passive: false });
+            });
+
+            applyMapTransform();
+        }
+
+        /* Audio Player Bar UI Update */
+        function updatePlayerBarUI() {
+            if (!currentArtwork) return;
+            document.getElementById('player-thumb').src = currentArtwork.img;
+            document.getElementById('player-title').innerText = currentArtwork.title;
+            document.getElementById('player-artist').innerText = currentArtwork.artist;
+            document.getElementById('player-room').innerText = `${currentArtwork.roomCode}展廳`;
+            
+            // 每次更新播放卡片時，同步地圖閃爍展廳
+            highlightRoomOnMap(currentArtwork.roomCode);
+        }
+
+        /* Modal Popup Logic */
+        function openArtworkModal() {
+            if (!currentArtwork) return;
+            document.getElementById('modal-image').src = currentArtwork.img;
+            document.getElementById('modal-title').innerText = currentArtwork.title;
+            document.getElementById('modal-artist').innerText = currentArtwork.artist;
+            document.getElementById('modal-year').innerText = currentArtwork.year;
+            document.getElementById('modal-room-badge').innerText = currentArtwork.room;
+            document.getElementById('modal-description').innerText = currentArtwork.audioText;
+
+            const highlightsContainer = document.getElementById('modal-highlights');
+            highlightsContainer.innerHTML = currentArtwork.highlights.map(h => `<li>${h}</li>`).join('');
+
+            updateModalFavButton();
+            document.getElementById('artwork-modal').classList.remove('hidden');
+            
+            // 開啟 modal 時，觸發地圖閃爍
+            highlightRoomOnMap(currentArtwork.roomCode);
+        }
+
+        function closeArtworkModal() {
+            document.getElementById('artwork-modal').classList.add('hidden');
+        }
+
+        function renderRouteSteps() {
+            const container = document.getElementById('route-steps');
+            container.innerHTML = '';
+            
+            const list = artworksData.filter(a => a.tourMode.includes(currentMode));
+            list.forEach((art, idx) => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center gap-3 p-2.5 bg-black/40 rounded-xl border border-white/10 hover:border-ferrari-red cursor-pointer transition';
+                item.onclick = () => selectArtwork(art);
+                
+                item.innerHTML = `
+                    <span class="w-6 h-6 rounded-full bg-ferrari-red/20 text-ferrari-red border border-ferrari-red/40 flex items-center justify-center font-tech text-xs font-bold shrink-0">
+                        ${idx + 1}
+                    </span>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-xs font-bold text-white truncate">${art.title}</h4>
+                            <span class="text-[10px] font-tech text-ferrari-gold">${art.roomCode}</span>
+                        </div>
+                        <p class="text-[11px] text-gray-400 truncate">${art.artist}</p>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        /* Web Speech Synthesis (語音導覽播放系統) */
+        function readAudioSpeech() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                isPlaying = false;
+                playProgressPercent = 0;
+                
+                const utterance = new SpeechSynthesisUtterance(currentArtwork.audioText);
+                utterance.lang = 'zh-TW';
+                utterance.rate = playbackSpeed;
+
+                utterance.onstart = () => {
+                    isPlaying = true;
+                    updatePlayIcons(true);
+                    startProgressTimer();
+                    // 播放語音時確保地圖上該展廳持續閃爍
+                    highlightRoomOnMap(currentArtwork.roomCode);
+                };
+
+                utterance.onend = () => {
+                    isPlaying = false;
+                    playProgressPercent = 100;
+                    updatePlayIcons(false);
+                    stopProgressTimer();
+                };
+
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function toggleAudioSpeech() {
+            if ('speechSynthesis' in window) {
+                if (window.speechSynthesis.speaking) {
+                    if (window.speechSynthesis.paused) {
+                        window.speechSynthesis.resume();
+                        isPlaying = true;
+                        updatePlayIcons(true);
+                        startProgressTimer();
+                    } else {
+                        window.speechSynthesis.pause();
+                        isPlaying = false;
+                        updatePlayIcons(false);
+                        stopProgressTimer();
+                    }
+                } else {
+                    readAudioSpeech();
+                }
+            }
+            // 點擊聆聽按鈕時閃爍烏菲茲實境地圖該區域
+            highlightRoomOnMap(currentArtwork.roomCode);
+        }
+
+        function startProgressTimer() {
+            stopProgressTimer();
+            speechProgressTimer = setInterval(() => {
+                if (playProgressPercent < 100) {
+                    playProgressPercent += 1;
+                    document.getElementById('audio-progress-bar').style.width = `${playProgressPercent}%`;
+                    document.getElementById('modal-audio-slider').value = playProgressPercent;
+                }
+            }, 300);
+        }
+
+        function stopProgressTimer() {
+            if (speechProgressTimer) clearInterval(speechProgressTimer);
+        }
+
+        function updatePlayIcons(playing) {
+            const pIcon = document.getElementById('play-icon');
+            const mIcon = document.getElementById('modal-play-icon');
+            if (playing) {
+                pIcon.setAttribute('data-lucide', 'pause');
+                mIcon.setAttribute('data-lucide', 'pause');
+            } else {
+                pIcon.setAttribute('data-lucide', 'play');
+                mIcon.setAttribute('data-lucide', 'play');
+            }
+            lucide.createIcons();
+        }
+
+        function changeSpeed() {
+            const speeds = [1.0, 1.25, 1.5];
+            const nextIdx = (speeds.indexOf(playbackSpeed) + 1) % speeds.length;
+            playbackSpeed = speeds[nextIdx];
+            document.getElementById('modal-speed-btn').innerText = `${playbackSpeed}x 語速`;
+            if (isPlaying) {
+                readAudioSpeech();
+            }
+        }
+
+        function seekAudio(val) {
+            playProgressPercent = parseInt(val);
+            document.getElementById('audio-progress-bar').style.width = `${playProgressPercent}%`;
+        }
+
+        function rewindAudio(sec) {
+            playProgressPercent = Math.max(0, playProgressPercent - 10);
+            document.getElementById('audio-progress-bar').style.width = `${playProgressPercent}%`;
+            document.getElementById('modal-audio-slider').value = playProgressPercent;
+        }
+
+        function forwardAudio(sec) {
+            playProgressPercent = Math.min(100, playProgressPercent + 10);
+            document.getElementById('audio-progress-bar').style.width = `${playProgressPercent}%`;
+            document.getElementById('modal-audio-slider').value = playProgressPercent;
+        }
+    </script>
+</body>
+</html>
